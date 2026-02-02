@@ -1,7 +1,9 @@
 import { Comment } from "@/types/comment"
-import { ApiConfig } from "../schema"
+import { getApiConfig } from "./get-api-config"
 
-export async function postComments(api: ApiConfig, comments: Comment[]) {
+export async function postComments(comments: Comment[]) {
+  const api = await getApiConfig()
+
   if (!api.url) {
     console.warn("No API URL set. Ignoring comments.")
     return
