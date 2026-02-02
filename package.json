@@ -1,6 +1,6 @@
 {
-  "name": "wxt-react-starter",
-  "description": "manifest.json description",
+  "name": "facebook-live-comment-bridge",
+  "description": "Scrape comments from your Facebook Live Stream and send them to your API for overlay and stuffs.",
   "private": true,
   "version": "0.0.0",
   "type": "module",
