@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/entrypoints/popup/style.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/entrypoints/popup/components",
+    "utils": "@/entrypoints/popup/lib/utils",
+    "ui": "@/entrypoints/popup/components/ui",
+    "lib": "@/entrypoints/popup/lib",
+    "hooks": "@/entrypoints/popup/hooks"
+  },
+  "iconLibrary": "lucide"
+}
