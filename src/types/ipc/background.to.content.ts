@@ -1,4 +1,6 @@
-export type BackgroundToContentEventMap = {}
+export type BackgroundToContentEventMap = {
+  "request:comments": undefined
+}
 
 export type BackgroundToContentEventKeys = keyof BackgroundToContentEventMap
 

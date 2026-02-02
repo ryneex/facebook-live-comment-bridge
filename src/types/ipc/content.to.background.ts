@@ -1,10 +1,6 @@
 import { Comment } from "../comment"
 
 export type ContentToBackgroundEventMap = {
-  ready: {
-    msg: string
-  }
-
   comments: Comment[]
 }
 
