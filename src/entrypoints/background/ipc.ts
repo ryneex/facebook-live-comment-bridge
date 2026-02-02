@@ -5,6 +5,7 @@ import {
   BackgroundToPopoverEventKeys,
   ContentToBackgroundEvent,
   ContentToBackgroundEventKeys,
+  OptionalArgs,
   PopoverToBackgroundEvent,
   PopoverToBackgroundEventKeys,
 } from "@/types"
@@ -92,12 +93,12 @@ class ContentIPC {
 
   send<T extends BackgroundToContentEventKeys>(
     event: T,
-    data: BackgroundToContentEvent<T>,
+    ...args: OptionalArgs<BackgroundToContentEvent<T>>
   ) {
     this.__ports.forEach((port) => {
       port.postMessage({
         type: event,
-        data,
+        data: args.at(0),
       })
     })
   }
@@ -155,12 +156,12 @@ class PopoverIPC {
 
   send<T extends BackgroundToPopoverEventKeys>(
     event: T,
-    data: BackgroundToPopoverEvent<T>,
+    ...args: OptionalArgs<BackgroundToPopoverEvent<T>>
   ) {
     this.__ports.forEach((port) => {
       port.postMessage({
         type: event,
-        data,
+        data: args.at(0),
       })
     })
   }

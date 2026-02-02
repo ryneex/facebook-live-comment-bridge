@@ -1,4 +1,8 @@
-import { PopoverToBackgroundEvent, PopoverToBackgroundEventKeys } from "@/types"
+import {
+  OptionalArgs,
+  PopoverToBackgroundEvent,
+  PopoverToBackgroundEventKeys,
+} from "@/types"
 import {
   BackgroundToPopoverEvent,
   BackgroundToPopoverEventKeys,
@@ -54,11 +58,11 @@ export class IPC {
 
   send<T extends PopoverToBackgroundEventKeys>(
     event: T,
-    data: PopoverToBackgroundEvent<T>,
+    ...args: OptionalArgs<PopoverToBackgroundEvent<T>>
   ) {
     this.__port.postMessage({
       type: event,
-      data,
+      data: args.at(0),
     })
   }
 }

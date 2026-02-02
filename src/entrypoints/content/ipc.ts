@@ -1,4 +1,8 @@
-import { ContentToBackgroundEvent, ContentToBackgroundEventKeys } from "@/types"
+import {
+  ContentToBackgroundEvent,
+  ContentToBackgroundEventKeys,
+  OptionalArgs,
+} from "@/types"
 import {
   BackgroundToContentEvent,
   BackgroundToContentEventKeys,
@@ -52,11 +56,11 @@ export class IPC {
 
   send<T extends ContentToBackgroundEventKeys>(
     event: T,
-    data: ContentToBackgroundEvent<T>,
+    ...args: OptionalArgs<ContentToBackgroundEvent<T>>
   ) {
     this.__port.postMessage({
       type: event,
-      data,
+      data: args.at(0),
     })
   }
 }
