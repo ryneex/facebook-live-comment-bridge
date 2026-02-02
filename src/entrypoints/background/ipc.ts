@@ -11,41 +11,60 @@ import {
 import z from "zod"
 
 const ContentMessageSchema = z.object({
-  from: z.literal("CONTENT"),
   type: z.string<ContentToBackgroundEventKeys>(),
   data: z.any(),
 })
 
 const PopoverMessageSchema = z.object({
-  from: z.literal("POPOVER"),
   type: z.string<PopoverToBackgroundEventKeys>(),
   data: z.any(),
 })
 
 type ContentCallBack<T extends ContentToBackgroundEventKeys> = (
   data: ContentToBackgroundEvent<T>,
-  sender: Browser.runtime.MessageSender,
+  port: Browser.runtime.Port,
 ) => void
 
 type PopoverCallBack<T extends PopoverToBackgroundEventKeys> = (
   data: PopoverToBackgroundEvent<T>,
-  sender: Browser.runtime.MessageSender,
+  port: Browser.runtime.Port,
 ) => void
 
 class ContentIPC {
   __events = new Map<ContentToBackgroundEventKeys, Set<Function>>()
+  __ports = new Set<Browser.runtime.Port>()
 
   constructor() {
-    browser.runtime.onMessage.addListener((data, sender) => {
-      const result = ContentMessageSchema.safeParse(data)
-      if (!result.success) return
+    browser.runtime.onConnect.addListener((port) => {
+      if (port.name !== "CONTENT") return
 
-      const events = this.__events.get(result.data.type)
+      if (this.__ports.size === 0) {
+        console.log("New port connected")
+      } else {
+        console.log("New port connected. Old ports will be ignored.")
+      }
 
-      if (!events) return
+      this.__ports.add(port)
 
-      events.forEach((callback) => {
-        callback(result.data.data, sender)
+      port.onMessage.addListener((data) => {
+        const lastPort = Array.from(this.__ports)[this.__ports.size - 1]
+        if (lastPort !== port) return
+
+        const result = ContentMessageSchema.safeParse(data)
+        if (!result.success) return
+
+        const events = this.__events.get(result.data.type)
+
+        if (!events) return
+
+        events.forEach((callback) => {
+          callback(result.data.data, port)
+        })
+      })
+
+      port.onDisconnect.addListener((port) => {
+        this.__ports.delete(port)
+        console.log("Port disconnected", port.name)
       })
     })
   }
@@ -72,31 +91,43 @@ class ContentIPC {
   }
 
   send<T extends BackgroundToContentEventKeys>(
-    tabId: number,
     event: T,
     data: BackgroundToContentEvent<T>,
   ) {
-    browser.tabs.sendMessage(tabId, {
-      type: event,
-      data,
+    this.__ports.forEach((port) => {
+      port.postMessage({
+        type: event,
+        data,
+      })
     })
   }
 }
 
 class PopoverIPC {
   __events = new Map<PopoverToBackgroundEventKeys, Set<Function>>()
+  __ports = new Set<Browser.runtime.Port>()
 
   constructor() {
-    browser.runtime.onMessage.addListener((data, sender) => {
-      const result = PopoverMessageSchema.safeParse(data)
-      if (!result.success) return
+    browser.runtime.onConnect.addListener((port) => {
+      if (port.name !== "POPOVER") return
+      this.__ports.add(port)
 
-      const events = this.__events.get(result.data.type)
+      port.onMessage.addListener((data) => {
+        const result = PopoverMessageSchema.safeParse(data)
+        if (!result.success) return
 
-      if (!events) return
+        const events = this.__events.get(result.data.type)
 
-      events.forEach((callback) => {
-        callback(result.data.data, sender)
+        if (!events) return
+
+        events.forEach((callback) => {
+          callback(result.data.data, port)
+        })
+      })
+
+      port.onDisconnect.addListener((port) => {
+        this.__ports.delete(port)
+        console.log("Port disconnected", port.name)
       })
     })
   }
@@ -126,10 +157,11 @@ class PopoverIPC {
     event: T,
     data: BackgroundToPopoverEvent<T>,
   ) {
-    browser.runtime.sendMessage({
-      from: "BG_TO_POPOVER",
-      type: event,
-      data,
+    this.__ports.forEach((port) => {
+      port.postMessage({
+        type: event,
+        data,
+      })
     })
   }
 }

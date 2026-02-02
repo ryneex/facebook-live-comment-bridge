@@ -6,21 +6,24 @@ import {
 import z from "zod"
 
 const PopoverMessageSchema = z.object({
-  from: z.literal("BG_TO_POPOVER"),
   type: z.string<BackgroundToPopoverEventKeys>(),
   data: z.any(),
 })
 
 type CallBack<T extends BackgroundToPopoverEventKeys> = (
   data: BackgroundToPopoverEvent<T>,
-  sender: Browser.runtime.MessageSender,
 ) => void
 
 export class IPC {
   __events = new Map<BackgroundToPopoverEventKeys, Set<Function>>()
+  __port: Browser.runtime.Port
 
   constructor() {
-    browser.runtime.onMessage.addListener((data, sender) => {
+    this.__port = browser.runtime.connect({
+      name: "POPOVER",
+    })
+
+    this.__port.onMessage.addListener((data) => {
       const result = PopoverMessageSchema.safeParse(data)
       if (!result.success) return
 
@@ -29,7 +32,7 @@ export class IPC {
       if (!events) return
 
       events.forEach((callback) => {
-        callback(result.data.data, sender)
+        callback(result.data.data)
       })
     })
   }
@@ -53,8 +56,7 @@ export class IPC {
     event: T,
     data: PopoverToBackgroundEvent<T>,
   ) {
-    browser.runtime.sendMessage({
-      from: "POPOVER",
+    this.__port.postMessage({
       type: event,
       data,
     })

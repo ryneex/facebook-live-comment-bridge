@@ -12,14 +12,16 @@ const ContentMessageSchema = z.object({
 
 type CallBack<T extends BackgroundToContentEventKeys> = (
   data: BackgroundToContentEvent<T>,
-  sender: Browser.runtime.MessageSender,
 ) => void
 
 export class IPC {
   __events = new Map<BackgroundToContentEventKeys, Set<Function>>()
+  __port: Browser.runtime.Port
 
   constructor() {
-    browser.runtime.onMessage.addListener((data, sender) => {
+    this.__port = browser.runtime.connect({ name: "CONTENT" })
+
+    this.__port.onMessage.addListener((data) => {
       const result = ContentMessageSchema.safeParse(data)
       if (!result.success) return
 
@@ -28,7 +30,7 @@ export class IPC {
       if (!events) return
 
       events.forEach((callback) => {
-        callback(result.data.data, sender)
+        callback(result.data.data)
       })
     })
   }
@@ -52,8 +54,7 @@ export class IPC {
     event: T,
     data: ContentToBackgroundEvent<T>,
   ) {
-    browser.runtime.sendMessage({
-      from: "CONTENT",
+    this.__port.postMessage({
       type: event,
       data,
     })
