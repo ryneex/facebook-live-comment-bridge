@@ -16,7 +16,7 @@ import { nonEmptyField } from "./helpers/non-empty-field"
 
 const FormSchema = z.object({
   url: z.url().nullable(),
-  secretKey: z.string().nullable(),
+  key: z.string().nullable(),
 })
 
 export function App() {
@@ -24,7 +24,7 @@ export function App() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       url: null,
-      secretKey: null,
+      key: null,
     },
   })
 
@@ -70,16 +70,15 @@ export function App() {
 
             <FormField
               control={form.control}
-              name="secretKey"
+              name="key"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Secret Key (Optional)</FormLabel>
+                  <FormLabel>API Key (Optional)</FormLabel>
                   <FormControl>
                     <Input {...nonEmptyField(field)} type="password" />
                   </FormControl>
                   <FormDescription>
-                    This secret will be sent to the API in the header
-                    "x-secret-key".
+                    This key will be sent to the API in the header "x-api-key".
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

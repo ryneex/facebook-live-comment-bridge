@@ -15,7 +15,7 @@ export async function postComments(comments: Comment[]) {
       body: JSON.stringify(comments),
       headers: {
         "Content-Type": "application/json",
-        ...(api.secretKey ? { "X-Secret-Key": api.secretKey } : undefined),
+        ...(api.key ? { "X-API-Key": api.key } : undefined),
       },
     })
 
