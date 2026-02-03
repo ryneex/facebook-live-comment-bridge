@@ -3,7 +3,7 @@ import { ApiConfig, ApiConfigSchema } from "../schema"
 export async function getApiConfig() {
   const emptyConfig: ApiConfig = {
     url: null,
-    key: null,
+    secretKey: null,
   }
 
   const stored = await browser.storage.local.get("api")

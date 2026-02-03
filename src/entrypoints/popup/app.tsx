@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,7 +16,7 @@ import { nonEmptyField } from "./helpers/non-empty-field"
 
 const FormSchema = z.object({
   url: z.url().nullable(),
-  key: z.string().nullable(),
+  secretKey: z.string().nullable(),
 })
 
 export function App() {
@@ -23,7 +24,7 @@ export function App() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       url: null,
-      key: null,
+      secretKey: null,
     },
   })
 
@@ -48,11 +49,11 @@ export function App() {
   }
 
   return (
-    <div className="p-4 w-64 flex flex-col gap-4">
+    <div className="p-4 max-w-sm w-[90000px] flex flex-col gap-4">
       <h1 className="text-lg font-bold">API Configuration</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
+          <div className="grid gap-4">
             <FormField
               control={form.control}
               name="url"
@@ -69,13 +70,17 @@ export function App() {
 
             <FormField
               control={form.control}
-              name="key"
+              name="secretKey"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Key</FormLabel>
+                  <FormLabel>Secret Key (Optional)</FormLabel>
                   <FormControl>
-                    <Input {...nonEmptyField(field)} />
+                    <Input {...nonEmptyField(field)} type="password" />
                   </FormControl>
+                  <FormDescription>
+                    This secret will be sent to the API in the header
+                    "x-secret-key".
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
